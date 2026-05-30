@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프로젝트 : 테이아 — 플레이어 분기 마인드맵</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F3EF;--bg2:#FFFFFF;--bg3:#ECEAE4;
+  --text:#2B2B2B;--text2:#666660;--text3:#999990;
+  --border:#D9D4CC;--border2:#C4BFB5;
+  --orange:#E8572A;--orange-lt:#FDE8DF;
+  --radius:10px;--radius-sm:6px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1E1E1C;--bg2:#2A2A27;--bg3:#323230;
+    --text:#E8E6DF;--text2:#A8A69F;--text3:#706E68;
+    --border:#3E3C37;--border2:#4E4C47;
+  }
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif}
+
+/* ── 헤더 ── */
+header{
+  background:var(--bg2);border-bottom:0.5px solid var(--border);
+  padding:16px 24px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:100;
+}
+.header-left h1{font-size:17px;font-weight:700;color:var(--orange);letter-spacing:-0.3px}
+.header-left p{font-size:12px;color:var(--text2);margin-top:2px}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* ── 툴바 ── */
+.toolbar{
+  background:var(--bg2);border-bottom:0.5px solid var(--border);
+  padding:10px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.toolbar-label{font-size:12px;color:var(--text2);margin-right:2px}
+btn-group{display:flex;gap:4px}
+
+button{
+  font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:500;
+  padding:5px 12px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);
+  background:var(--bg2);color:var(--text);cursor:pointer;transition:all .15s;
+  white-space:nowrap;
+}
+button:hover{background:var(--bg3);border-color:var(--border2)}
+button.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+button.ghost{background:transparent;border-color:var(--border)}
+
+.sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+
+/* ── 범례 ── */
+.legend{
+  padding:8px 24px;background:var(--bg);border-bottom:0.5px solid var(--border);
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ── 메인 레이아웃 ── */
+#app{display:flex;height:calc(100vh - 130px);overflow:hidden}
+#canvas-wrap{flex:1;overflow:auto;padding:20px;position:relative}
+svg#mm{display:block;min-width:720px}
+
+/* ── 상세 패널 ── */
+#detail-panel{
+  width:260px;flex-shrink:0;background:var(--bg2);
+  border-left:0.5px solid var(--border);overflow-y:auto;
+  display:flex;flex-direction:column;
+  transition:width .2s;
+}
+#detail-panel.closed{width:0;overflow:hidden;border:none}
+#dp-header{
+  padding:14px 16px 10px;border-bottom:0.5px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:8px;
+  position:sticky;top:0;background:var(--bg2);z-index:5;
+}
+#dp-title{font-size:13px;font-weight:700;color:var(--text);line-height:1.4}
+#dp-close{
+  background:none;border:none;padding:2px;cursor:pointer;
+  color:var(--text3);font-size:16px;line-height:1;flex-shrink:0;
+}
+#dp-body{padding:12px 16px;font-size:12px;flex:1}
+.dp-section{margin-bottom:14px}
+.dp-section-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.trust-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:4px 0;border-bottom:0.5px solid var(--border);
+}
+.trust-row:last-child{border-bottom:none}
+.trust-name{color:var(--text)}
+.trust-val{font-weight:700;font-size:12px}
+.trust-pos{color:#2E7D32}
+.trust-neg{color:#C62828}
+.opt-item{
+  padding:6px 8px;border-radius:var(--radius-sm);margin-bottom:5px;
+  border:0.5px solid var(--border);background:var(--bg);
+}
+.opt-label{font-size:11px;font-weight:500;color:var(--text);line-height:1.4}
+.opt-route{font-size:10px;color:var(--text2);margin-top:3px}
+.opt-trust{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.trust-badge{
+  font-size:10px;font-weight:500;padding:1px 5px;
+  border-radius:3px;
+}
+.type-badge{
+  display:inline-block;font-size:10px;font-weight:500;
+  padding:2px 7px;border-radius:3px;margin-bottom:10px;
+}
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;color:var(--text3);font-size:13px;text-align:center;padding:24px;
+  gap:8px;
+}
+.empty-state svg{opacity:.3}
+
+/* ── SVG 인터랙션 ── */
+.ch-node,.ev-node,.opt-node{cursor:pointer}
+.ch-node rect,.ev-node rect,.opt-node rect{transition:opacity .12s}
+.ch-node:hover rect,.ev-node:hover rect,.opt-node:hover rect{opacity:.85}
+
+/* ── 스크롤바 ── */
+#canvas-wrap::-webkit-scrollbar{width:6px;height:6px}
+#canvas-wrap::-webkit-scrollbar-track{background:var(--bg3)}
+#canvas-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+#detail-panel::-webkit-scrollbar{width:4px}
+#detail-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── 토스트 ── */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);
+  background:#2B2B2B;color:#fff;font-size:12px;padding:8px 16px;
+  border-radius:20px;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;z-index:999;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── 반응형 ── */
+@media(max-width:768px){
+  #detail-panel{position:fixed;right:0;top:0;height:100%;z-index:200;box-shadow:-4px 0 20px rgba(0,0,0,.15)}
+  #detail-panel.closed{width:0}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>프로젝트 : 테이아</h1>
+    <p>플레이어 분기 마인드맵 &nbsp;|&nbsp; C1 ~ C12 &nbsp;|&nbsp; 게임 시나리오 기획자 장윤아</p>
+  </div>
+  <div class="header-right">
+    <button class="ghost" onclick="exportSVG()">SVG 내보내기</button>
+  </div>
+</header>
+
+<div class="toolbar">
+  <span class="toolbar-label">파트</span>
+  <button id="btn-all" class="active" onclick="filterPart('all')">전체</button>
+  <button id="btn-1" onclick="filterPart('1부')">1부 (C1~3)</button>
+  <button id="btn-21" onclick="filterPart('2-1부')">2-1부 (C4~9)</button>
+  <button id="btn-22" onclick="filterPart('2-2부')">2-2부 (C10~12)</button>
+  <div class="sep"></div>
+  <button onclick="expandAll()">전체 펼치기</button>
+  <button onclick="collapseAll()">전체 접기</button>
+  <div class="sep"></div>
+  <span class="toolbar-label">신뢰도</span>
+  <button id="btn-trust-on" class="active" onclick="toggleTrust(true)">표시</button>
+  <button id="btn-trust-off" onclick="toggleTrust(false)">숨김</button>
+</div>
+
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:#534AB7"></div>챕터</div>
+  <div class="leg"><div class="leg-dot" style="background:#0F6E56"></div>선택지 이벤트</div>
+  <div class="leg"><div class="leg-dot" style="background:#BA7517"></div>고정 이벤트</div>
+  <div class="leg"><div class="leg-dot" style="background:#185FA5"></div>자동 분기</div>
+  <div class="leg"><div class="leg-dot" style="background:#2E7D32"></div>정답/생존 루트</div>
+  <div class="leg"><div class="leg-dot" style="background:#A32D2D"></div>배드엔딩/사망</div>
+  <div class="leg"><div class="leg-dot" style="background:#6A1B9A"></div>특수 루트</div>
+</div>
+
+<div id="app">
+  <div id="canvas-wrap">
+    <svg id="mm" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <div id="detail-panel" class="closed">
+    <div id="dp-header">
+      <div id="dp-title">—</div>
+      <button id="dp-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div id="dp-body">
+      <div class="empty-state">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <p>이벤트나 선택지를<br>클릭하면 상세 정보가<br>여기에 표시됩니다.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const CHAPTERS=[
+  {id:"C1",label:"챕터 1",part:"1부",color:"#534AB7",events:[
+    {id:"c1e1",type:"choice",label:"엔진 파손 추리",opts:[
+      {label:"내부 폭발 사고",trust:{이제야:-1,액터:-1},route:null,isWrong:true},
+      {label:"외부의 물리적 충격 (정답)",trust:{이제야:+1,액터:+1},route:null,isCorrect:true}
+    ]}
+  ]},
+  {id:"C2",label:"챕터 2",part:"1부",color:"#534AB7",events:[
+    {id:"c2e1",type:"choice",label:"팀 배분 선택",note:"반드시 행성 조사팀 합류",opts:[
+      {label:"행성 조사팀 합류 (필수)",trust:{},route:"→ 행성 조사팀 합류",isFixed:true},
+      {label:"우주선 수리팀 합류",trust:{},route:null}
+    ]},
+    {id:"c2e2",type:"choice",label:"추가 조사 여부",opts:[
+      {label:"우주선으로 돌아간다",trust:{이제야:-1,스타토:-1},route:null},
+      {label:"조금 더 조사한다",trust:{이제야:+1,스타토:+1},route:null}
+    ]}
+  ]},
+  {id:"C3",label:"챕터 3",part:"1부",color:"#534AB7",events:[
+    {id:"c3e1",type:"fixed",label:"침대 이벤트",trust:{요한:+1}},
+    {id:"c3e2",type:"choice",label:"싱크홀 원인 추리",opts:[
+      {label:"지하수 때문이다 (오답)",trust:{이제야:-1,코헨:-1,안단테:-1,액터:-1,케렐라이드:-1,스타토:-1},route:null,isWrong:true},
+      {label:"내핵 때문이다 (정답)",trust:{이제야:+1,코헨:+1,안단테:+1,액터:+1,케렐라이드:+1,스타토:+1},route:null,isCorrect:true}
+    ]}
+  ]},
+  {id:"C4",label:"챕터 4",part:"2-1부",color:"#3A8A6E",events:[
+    {id:"c4e1",type:"choice",label:"팀 배분 재선택",note:"반드시 수리팀 합류",opts:[
+      {label:"조사팀에 합류한다",trust:{},route:null},
+      {label:"수리팀에 합류한다 (필수)",trust:{이제야:+1,코헨:+1,스타토:+1},route:"→ 수리팀 합류 (필수)",isFixed:true}
+    ]},
+    {id:"c4e2",type:"fixed",label:"수리 이벤트 3회",trust:{안단테:+1,스타토:+1,케렐라이드:+1}},
+    {id:"c4e3",type:"fixed",label:"대화 이벤트",trust:{코헨:+1,스타토:+1}}
+  ]},
+  {id:"C5",label:"챕터 5",part:"2-1부",color:"#3A8A6E",events:[
+    {id:"c5e1",type:"choice",label:"선택② 안단테 대화",opts:[
+      {label:"무슨 그런 섭섭한 말을 해요?",trust:{안단테:-1},route:null},
+      {label:"이럴거면 그냥 어제 자원하지 그랬어요?",trust:{안단테:+1},route:null}
+    ]},
+    {id:"c5e2",type:"choice",label:"선택③ 액터 대화",opts:[
+      {label:"사람들이 너를 원망하길 바라?",trust:{액터:+1},route:null},
+      {label:"너무 넘겨짚는 거 아냐?",trust:{액터:-1},route:null}
+    ]},
+    {id:"c5e3",type:"choice",label:"선택④ 안단테 신뢰 여부",opts:[
+      {label:"소문은 소문일 뿐이라고 생각한다",trust:{안단테:+1},route:null},
+      {label:"행동만 봐도 알 수 있다고 생각한다",trust:{안단테:-1},route:null}
+    ]},
+    {id:"c5e4",type:"choice",label:"선택⑤ 코헨·스타토 분쟁 ★",opts:[
+      {label:"스타토의 이야기를 들어본다",trust:{안단테:+1,스타토:+1,액터:-1},route:"생존 루트 진입",
+       sub:[
+         {label:"스타토 생명유지장치 확인",trust:{이제야:+1,코헨:+1},route:"스타토 생존"},
+         {label:"확인하지 않는다",trust:{},route:"스타토 사망"}
+       ]},
+      {label:"적당히 끊어넘긴다",trust:{스타토:-1,안단테:-1,이제야:-1,코헨:-1,액터:+1},route:"사망 루트 가능성↑"}
+    ]},
+    {id:"c5e5",type:"choice",label:"선택⑥ 구조 방법",opts:[
+      {label:"구조 인력을 투입한다",trust:{케렐라이드:-1,액터:-1,안단테:-1},route:null},
+      {label:"주변에 비를 피할 곳이 있는지 물어보자 (정답)",trust:{},route:"합산 조건 확인",isCorrect:true},
+      {label:"비가 그치길 기다리면서 다른 방법을 찾아보자",trust:{},route:"시간초과 → 이제야·코헨·스타토 전원 사망",isBad:true}
+    ]},
+    {id:"c5auto",type:"auto",label:"자동분기: 이제야·코헨·스타토 신뢰도 합산",note:"C5 선택⑥ '비 피할 곳' 선택 시 발동",opts:[
+      {label:"합산 10 이상 → 생존 루트",trust:{},route:"이제야·코헨·스타토 생존"},
+      {label:"합산 10 미만 → 배드엔딩",trust:{},route:"사망 루트 + 배드엔딩",isBad:true}
+    ]}
+  ]},
+  {id:"C6",label:"챕터 6",part:"2-1부",color:"#3A8A6E",events:[
+    {id:"c6e1",type:"choice",label:"선택⑦ 안단테 위로",opts:[
+      {label:"스타토 때문에 화가 났다",trust:{안단테:-1},route:null},
+      {label:"자신 때문에 화가 났다",trust:{안단테:+1},route:null}
+    ]},
+    {id:"c6e2",type:"choice",label:"선택⑧ 스타토에게",opts:[
+      {label:"스타토 때문이라며 솔직하게 말한다",trust:{스타토:+1},route:null},
+      {label:"스타토 때문이 아니라며 다정하게 말한다",trust:{스타토:-1},route:null}
+    ]},
+    {id:"c6e3",type:"choice",label:"선택⑨ 우주선 조작 추리",opts:[
+      {label:"사람이 조작한 것이다 (오답)",trust:{이제야:-1,코헨:-1,안단테:-1,액터:-1,케렐라이드:-1,스타토:-1},route:null,isWrong:true},
+      {label:"자동으로 조작된 것이다 (정답)",trust:{이제야:+1,코헨:+1,안단테:+1,액터:+1,케렐라이드:+1,스타토:+1},route:null,isCorrect:true}
+    ]},
+    {id:"c6e4",type:"choice",label:"선택⑩ 클라우드 해킹 방법",opts:[
+      {label:"본부 클라우드 보안 뚫기",trust:{},route:"과제 A 발생 (퍼즐)"},
+      {label:"워치 권한 강탈 막기",trust:{},route:"과제 B 발생 (퍼즐)"}
+    ]},
+    {id:"c6e5",type:"fixed",label:"코헨 발언 이벤트",trust:{요한:-1}},
+    {id:"c6e6",type:"choice",label:"선택⑪ 모두를 설득하는가",opts:[
+      {label:"모두를 설득한다",trust:{이제야:+1,코헨:+1,안단테:+1,액터:+1,케렐라이드:+1,스타토:+1},route:null},
+      {label:"침묵을 지킨다",trust:{},route:null}
+    ]},
+    {id:"c6e7",type:"choice",label:"선택⑫ 솔직하게 말하는가 → 자동분기 발동",opts:[
+      {label:"솔직하게 말한다",trust:{},route:null},
+      {label:"침묵한다 → 신뢰도 합산 분기 발동",trust:{},route:null}
+    ]},
+    {id:"c6auto",type:"auto",label:"자동분기: 전원 신뢰도 합산",note:"선택⑫-2(침묵) 선택 시 발동",opts:[
+      {label:"합산 12 이상 → S#52 정상 진행",trust:{},route:"정상 스토리 진행"},
+      {label:"합산 12 미만 → S#51 배드엔딩",trust:{},route:"요한 살해당함",isBad:true}
+    ]}
+  ]},
+  {id:"C7",label:"챕터 7",part:"2-1부",color:"#3A8A6E",events:[
+    {id:"c7e1",type:"auto",label:"자동분기: C6 신뢰도 합산 이월",opts:[
+      {label:"합산 12 이상 → 정상 루트",trust:{이제야:+1,코헨:+1,안단테:+1,액터:+1,케렐라이드:+1,스타토:+1},route:"정상 진행"},
+      {label:"합산 12 미만 → 배드엔딩",trust:{},route:"배드엔딩",isBad:true}
+    ]},
+    {id:"c7e2",type:"choice",label:"선택① 식량창고 조사 여부",opts:[
+      {label:"조사는 여기까지 한다",trust:{},route:"배드엔딩: 요한이 케렐라이드에게 살해당함",isBad:true},
+      {label:"식량창고를 살피러 간다",trust:{},route:"정상 진행"}
+    ]}
+  ]},
+  {id:"C8",label:"챕터 8",part:"2-1부",color:"#3A8A6E",events:[
+    {id:"c8e1",type:"choice",label:"선택② 케렐라이드에게 전달",opts:[
+      {label:"드라이버",trust:{},route:null},
+      {label:"손전등",trust:{},route:null},
+      {label:"먹다 남은 간식 (정답)",trust:{케렐라이드:+1},route:null,isCorrect:true}
+    ]},
+    {id:"c8e2",type:"choice",label:"선택③ 본부 의도 추리",opts:[
+      {label:"내부를 분열시키는 것",trust:{},route:null},
+      {label:"이 난관을 시험하는 것 (정답)",trust:{액터:+1},route:null,isCorrect:true}
+    ]},
+    {id:"c8e3",type:"choice",label:"선택④ 안단테의 부탁",opts:[
+      {label:"안단테의 부탁을 수락한다",trust:{안단테:+1},route:null}
+    ]},
+    {id:"c8e4",type:"choice",label:"선택⑤ 배신자 처벌 의견",opts:[
+      {label:"가차없이 처벌해 본보기를 보여야 한다",trust:{},route:null},
+      {label:"그 사람과 더 대화해볼 것 같다",trust:{이제야:+1},route:null}
+    ]},
+    {id:"c8e5",type:"fixed",label:"미니게임·화장실 파이프 이벤트",trust:{액터:+1,코헨:+1}}
+  ]},
+  {id:"C9",label:"챕터 9",part:"2-1부",color:"#3A8A6E",events:[
+    {id:"c9e1",type:"choice",label:"선택⑤ 조사 방향 ★엔딩 분기",opts:[
+      {label:"내부를 먼저 조사한다",trust:{액터:+1,코헨:+1},route:"S#72 배드엔딩: 케렐라이드 사망",isBad:true},
+      {label:"외부를 먼저 조사한다 (정답)",trust:{안단테:+1,스타토:+1},route:"S#75 정상 진행",isCorrect:true}
+    ]}
+  ]},
+  {id:"C10-12",label:"챕터 10~12",part:"2-2부",color:"#185FA5",events:[
+    {id:"c11e1",type:"choice",label:"선택 안단테 증언 확보",note:"안단테 신뢰도 4 이상 조건",opts:[
+      {label:"전 형이 배신자라고 생각 안 해요",trust:{},route:null},
+      {label:"한 번만 절 믿어주세요",trust:{},route:"신뢰도 4↑ → 안단테 증언 획득 (추리 연동)"}
+    ]},
+    {id:"c12e1",type:"choice",label:"최종 범인 지목 ★트루엔딩 분기",opts:[
+      {label:"이제야 / 안단테 / 코헨 / 케렐라이드 / 스타토 / 요한",trust:{},route:"노멀/배드 엔딩"},
+      {label:"액터 지목 + 증거 완비",trust:{},route:"트루 엔딩 🎉",isCorrect:true}
+    ]}
+  ]}
+];
+
+const TYPE_META={
+  choice:{fill:"#E8F5E9",stroke:"#0F6E56",text:"#085041",label:"선택지"},
+  fixed: {fill:"#FFF9C4",stroke:"#BA7517",text:"#633806",label:"고정 이벤트"},
+  auto:  {fill:"#E3F2FD",stroke:"#185FA5",text:"#0C447C",label:"자동 분기"}
+};
+
+function optColor(opt){
+  if(opt.isBad||opt.isWrong) return{fill:"#FFEBEE",stroke:"#A32D2D",text:"#A32D2D"};
+  if(opt.isCorrect)           return{fill:"#E8F5E9",stroke:"#2E7D32",text:"#1B5E20"};
+  if(opt.isFixed)             return{fill:"#FFF3E0",stroke:"#E65100",text:"#BF360C"};
+  if(opt.route)               return{fill:"#F3E5F5",stroke:"#6A1B9A",text:"#4A148C"};
+  return{fill:"#F5F5F5",stroke:"#888780",text:"#444441"};
+}
+
+let expanded={};
+let currentPart="all";
+let showTrust=true;
+const NS="http://www.w3.org/2000/svg";
+
+function el(tag,attrs={},children=[]){
+  const e=document.createElementNS(NS,tag);
+  for(let[k,v]of Object.entries(attrs))e.setAttribute(k,v);
+  for(let c of children)e.appendChild(c);
+  return e;
+}
+function svgText(x,y,str,{size=12,weight=400,color,anchor="start",clip}={}){
+  const t=el("text",{x,y,"font-size":size,"font-weight":weight,"font-family":"'Noto Sans KR',sans-serif",
+    fill:color||"#2B2B2B","text-anchor":anchor,"dominant-baseline":"central"});
+  if(clip)t.setAttribute("clip-path",`url(#${clip})`);
+  t.textContent=str;
+  return t;
+}
+function svgRect(x,y,w,h,{rx=6,fill,stroke,sw=0.5}={}){
+  return el("rect",{x,y,width:w,height:h,rx,fill,stroke,"stroke-width":sw});
+}
+function truncate(str,max){return str.length>max?str.slice(0,max-1)+"…":str;}
+
+function render(){
+  const svg=document.getElementById("mm");
+  svg.innerHTML="";
+
+  const isDark=window.matchMedia("(prefers-color-scheme:dark)").matches;
+  const textColor=isDark?"#E8E6DF":"#2B2B2B";
+  const text2Color=isDark?"#A8A69F":"#666660";
+  const lineColor=isDark?"#4E4C47":"#C4BFB5";
+
+  const chapters=CHAPTERS.filter(c=>currentPart==="all"||c.part===currentPart);
+
+  const PAD=24,CH_W=118,CH_H=38,EV_W=168,EV_H=34;
+  const OPT_W=200,OPT_H=30,SUB_W=172,SUB_H=26;
+  const COL_GAP=56,ROW_GAP=8,BADGE_W=34,BADGE_GAP=3;
+
+  const chapX=PAD,evX=chapX+CH_W+COL_GAP;
+  const optX=evX+EV_W+COL_GAP,subX=optX+OPT_W+COL_GAP;
+
+  let y=PAD;
+  const paths=[],nodes=[];
+
+  const defs=el("defs");
+  svg.appendChild(defs);
+
+  for(const ch of chapters){
+    const chTopY=y;
+    const chMidY=y+CH_H/2;
+
+    const chG=el("g",{class:"ch-node"});
+    chG.appendChild(svgRect(chapX,y,CH_W,CH_H,{fill:ch.color,stroke:ch.color,sw:1.5,rx:10}));
+    chG.appendChild(svgText(chapX+CH_W/2,y+12,ch.label,{size:13,weight:700,color:"#FFFFFF",anchor:"middle"}));
+    chG.appendChild(svgText(chapX+CH_W/2,y+26,ch.part,{size:10,weight:400,color:"rgba(255,255,255,0.7)",anchor:"middle"}));
+    chG.onclick=()=>toggleChapter(ch.id);
+    nodes.push(chG);
+
+    const expandIcon=el("text",{x:chapX+CH_W-10,y:y+CH_H/2,"font-size":10,"font-weight":700,
+      fill:"rgba(255,255,255,0.8)","text-anchor":"middle","dominant-baseline":"central","pointer-events":"none"});
+    expandIcon.textContent=expanded[ch.id]?"▲":"▼";
+    nodes.push(expandIcon);
+
+    const evs=expanded[ch.id]?ch.events:[];
+    let evY=y;
+
+    for(const ev of evs){
+      const tm=TYPE_META[ev.type]||TYPE_META.choice;
+      const evMidY=evY+EV_H/2;
+
+      const evG=el("g",{class:"ev-node"});
+      const clipId=`clip-ev-${ev.id}`;
+      defs.appendChild(el("clipPath",{id:clipId},[el("rect",{x:evX+8,y:evY,width:EV_W-16,height:EV_H})]));
+      evG.appendChild(svgRect(evX,evY,EV_W,EV_H,{fill:tm.fill,stroke:tm.stroke,sw:0.5,rx:6}));
+      evG.appendChild(svgText(evX+10,evY+EV_H/2,truncate(ev.label,20),{size:11,weight:500,color:tm.text,clip:clipId}));
+
+      const typeTag=el("rect",{x:evX+EV_W-42,y:evY+4,width:38,height:14,rx:3,fill:tm.stroke,opacity:"0.15"});
+      const typeTagT=svgText(evX+EV_W-23,evY+11,ev.type==="auto"?"자동":ev.type==="fixed"?"고정":"선택",{size:9,weight:500,color:tm.stroke,anchor:"middle"});
+      evG.appendChild(typeTag);evG.appendChild(typeTagT);
+      evG.onclick=()=>showDetail(ev);
+
+      paths.push(el("path",{d:`M${chapX+CH_W},${chMidY} C${chapX+CH_W+COL_GAP*0.55},${chMidY} ${evX-COL_GAP*0.55},${evMidY} ${evX},${evMidY}`,
+        fill:"none",stroke:lineColor,"stroke-width":"0.8"}));
+      nodes.push(evG);
+
+      if(ev.opts){
+        let optY=evY;
+        for(const opt of ev.opts){
+          const oc=optColor(opt);
+          const optMidY=optY+OPT_H/2;
+
+          const optG=el("g",{class:"opt-node"});
+          const clipId2=`clip-opt-${ev.id}-${optY}`;
+          const maxTextW=OPT_W-16-(showTrust?Math.min(Object.keys(opt.trust||{}).length,3)*(BADGE_W+BADGE_GAP)+4:0);
+          defs.appendChild(el("clipPath",{id:clipId2},[el("rect",{x:optX+8,y:optY,width:maxTextW,height:OPT_H})]));
+          optG.appendChild(svgRect(optX,optY,OPT_W,OPT_H,{fill:oc.fill,stroke:oc.stroke,sw:0.5,rx:5}));
+          optG.appendChild(svgText(optX+9,optY+OPT_H/2,truncate(opt.label,24),{size:10,weight:500,color:oc.text,clip:clipId2}));
+
+          if(showTrust){
+            const entries=Object.entries(opt.trust||{});
+            let bx=optX+OPT_W-4;
+            for(const [ch2,v] of entries.slice(0,3).reverse()){
+              const bc=v>0?"#2E7D32":"#C62828";
+              const bg2=v>0?"#E8F5E9":"#FFEBEE";
+              bx-=BADGE_W+BADGE_GAP;
+              optG.appendChild(el("rect",{x:bx,y:optY+5,width:BADGE_W,height:OPT_H-10,rx:3,fill:bg2,stroke:bc,"stroke-width":"0.5"}));
+              const bt=el("text",{x:bx+BADGE_W/2,y:optY+OPT_H/2,"font-size":9,"font-weight":700,fill:bc,"text-anchor":"middle","dominant-baseline":"central","font-family":"'Noto Sans KR',sans-serif"});
+              bt.textContent=(v>0?"+":"")+v;
+              optG.appendChild(bt);
+            }
+          }
+
+          const dashArr=ev.type==="auto"?"5,3":"none";
+          paths.push(el("path",{d:`M${evX+EV_W},${evMidY} C${evX+EV_W+COL_GAP*0.5},${evMidY} ${optX-COL_GAP*0.5},${optMidY} ${optX},${optMidY}`,
+            fill:"none",stroke:oc.stroke,"stroke-width":"0.7","stroke-dasharray":dashArr}));
+
+          optG.onclick=()=>showOptDetail(opt,ev.label);
+          nodes.push(optG);
+
+          if(opt.sub){
+            let subY=optY;
+            for(const sub of opt.sub){
+              const sb=sub.route&&sub.route.includes("사망")?{fill:"#FFEBEE",stroke:"#A32D2D",text:"#A32D2D"}:{fill:"#E8F5E9",stroke:"#2E7D32",text:"#1B5E20"};
+              const subMidY=subY+SUB_H/2;
+              const subG=el("g",{class:"opt-node"});
+              subG.appendChild(svgRect(subX,subY,SUB_W,SUB_H,{fill:sb.fill,stroke:sb.stroke,sw:0.5,rx:4}));
+              subG.appendChild(svgText(subX+8,subY+SUB_H/2,truncate(sub.label,18),{size:10,weight:500,color:sb.text}));
+              if(sub.route){
+                subG.appendChild(svgText(subX+8,subY+SUB_H/2+11,truncate(sub.route,16),{size:9,color:sb.stroke}));
+              }
+              paths.push(el("path",{d:`M${optX+OPT_W},${optMidY} C${optX+OPT_W+20},${optMidY} ${subX-20},${subMidY} ${subX},${subMidY}`,
+                fill:"none",stroke:sb.stroke,"stroke-width":"0.6","stroke-dasharray":"3,3"}));
+              subG.onclick=()=>showOptDetail(sub,opt.label);
+              nodes.push(subG);
+              subY+=SUB_H+ROW_GAP;
+            }
+            optY=Math.max(optY+OPT_H+ROW_GAP,subY);
+          } else {
+            optY+=OPT_H+ROW_GAP;
+          }
+        }
+        evY=Math.max(evY+EV_H+ROW_GAP,optY);
+      } else {
+        evY+=EV_H+ROW_GAP;
+      }
+    }
+    y=Math.max(y+CH_H+ROW_GAP,evY)+18;
+  }
+
+  const totalW=subX+SUB_W+PAD;
+  const totalH=y+PAD;
+  svg.setAttribute("viewBox",`0 0 ${totalW} ${totalH}`);
+  svg.setAttribute("width","100%");
+  svg.setAttribute("height",totalH);
+  svg.style.minWidth=totalW+"px";
+
+  for(const p of paths)svg.appendChild(p);
+  for(const n of nodes)svg.appendChild(n);
+}
+
+function toggleChapter(id){
+  expanded[id]=!expanded[id];
+  render();
+  showToast(expanded[id]?"펼쳤어요":"접었어요");
+}
+function expandAll(){
+  CHAPTERS.forEach(c=>{expanded[c.id]=true});render();showToast("전체 펼쳤어요");
+}
+function collapseAll(){
+  CHAPTERS.forEach(c=>{expanded[c.id]=false});render();showToast("전체 접었어요");
+}
+function filterPart(p){
+  currentPart=p;
+  ["all","1","21","22"].forEach(k=>document.getElementById("btn-"+k)?.classList.remove("active"));
+  const m={all:"all","1부":"1","2-1부":"21","2-2부":"22"};
+  document.getElementById("btn-"+(m[p]||p))?.classList.add("active");
+  render();
+}
+function toggleTrust(on){
+  showTrust=on;
+  document.getElementById("btn-trust-on").classList.toggle("active",on);
+  document.getElementById("btn-trust-off").classList.toggle("active",!on);
+  render();
+}
+
+function openDetail(){
+  document.getElementById("detail-panel").classList.remove("closed");
+}
+function closeDetail(){
+  document.getElementById("detail-panel").classList.add("closed");
+  document.getElementById("dp-body").innerHTML=`<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><p>이벤트나 선택지를<br>클릭하면 상세 정보가<br>여기에 표시됩니다.</p></div>`;
+}
+
+function showDetail(ev){
+  openDetail();
+  const tm=TYPE_META[ev.type]||TYPE_META.choice;
+  document.getElementById("dp-title").textContent=ev.label;
+  let html=`<span class="type-badge" style="background:${tm.fill};color:${tm.stroke};border:0.5px solid ${tm.stroke}">${tm.label}</span>`;
+  if(ev.note) html+=`<div style="font-size:11px;color:var(--text2);margin-bottom:10px;padding:6px 8px;background:var(--bg3);border-radius:4px">📌 ${ev.note}</div>`;
+  if(ev.trust){
+    const entries=Object.entries(ev.trust);
+    if(entries.length){
+      html+=`<div class="dp-section"><div class="dp-section-title">신뢰도 변화</div>`;
+      for(const [c,v]of entries)html+=`<div class="trust-row"><span class="trust-name">${c}</span><span class="trust-val ${v>0?"trust-pos":"trust-neg"}">${v>0?"+":""}${v}</span></div>`;
+      html+=`</div>`;
+    }
+  }
+  if(ev.opts){
+    html+=`<div class="dp-section"><div class="dp-section-title">선택지 목록</div>`;
+    for(const opt of ev.opts){
+      const oc=optColor(opt);
+      html+=`<div class="opt-item" style="border-color:${oc.stroke}">`;
+      html+=`<div class="opt-label" style="color:${oc.text}">${opt.label}</div>`;
+      if(opt.route)html+=`<div class="opt-route">→ ${opt.route}</div>`;
+      const entries=Object.entries(opt.trust||{});
+      if(entries.length){
+        html+=`<div class="opt-trust">`;
+        for(const [c,v]of entries){
+          const bc=v>0?"#2E7D32":"#C62828";
+          const bg2=v>0?"#E8F5E9":"#FFEBEE";
+          html+=`<span class="trust-badge" style="background:${bg2};color:${bc}">${c} ${v>0?"+":""}${v}</span>`;
+        }
+        html+=`</div>`;
+      }
+      if(opt.sub){
+        html+=`<div style="margin-top:6px;padding-top:6px;border-top:0.5px solid var(--border)">`;
+        for(const s of opt.sub){
+          const sc=s.route&&s.route.includes("사망")?"#C62828":"#2E7D32";
+          html+=`<div style="font-size:10px;color:${sc};padding:2px 0">↳ ${s.label} → <strong>${s.route||"—"}</strong></div>`;
+        }
+        html+=`</div>`;
+      }
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  }
+  document.getElementById("dp-body").innerHTML=html;
+}
+
+function showOptDetail(opt,parentLabel){
+  openDetail();
+  const oc=optColor(opt);
+  document.getElementById("dp-title").textContent=opt.label;
+  let html="";
+  if(parentLabel)html+=`<div style="font-size:11px;color:var(--text2);margin-bottom:8px">↑ ${parentLabel}</div>`;
+  if(opt.route){
+    const isBad=opt.route.includes("배드")||opt.route.includes("사망");
+    const c=isBad?"#C62828":"#0F6E56";
+    const bg2=isBad?"#FFEBEE":"#E8F5E9";
+    html+=`<div style="font-size:12px;font-weight:500;padding:6px 10px;border-radius:5px;background:${bg2};color:${c};margin-bottom:12px">→ ${opt.route}</div>`;
+  }
+  const entries=Object.entries(opt.trust||{});
+  if(entries.length){
+    html+=`<div class="dp-section"><div class="dp-section-title">신뢰도 변화</div>`;
+    for(const [c,v]of entries)html+=`<div class="trust-row"><span class="trust-name">${c}</span><span class="trust-val ${v>0?"trust-pos":"trust-neg"}">${v>0?"+":""}${v}</span></div>`;
+    html+=`</div>`;
+  } else {
+    html+=`<div style="font-size:12px;color:var(--text2)">이 선택지에서 신뢰도 변화 없음</div>`;
+  }
+  if(opt.sub){
+    html+=`<div class="dp-section"><div class="dp-section-title">하위 분기</div>`;
+    for(const s of opt.sub){
+      const sc=s.route&&s.route.includes("사망")?"#C62828":"#2E7D32";
+      const sbg=s.route&&s.route.includes("사망")?"#FFEBEE":"#E8F5E9";
+      html+=`<div class="opt-item" style="border-color:${sc};background:${sbg}">`;
+      html+=`<div class="opt-label" style="color:${sc}">${s.label}</div>`;
+      html+=`<div class="opt-route" style="color:${sc}">→ ${s.route||"—"}</div>`;
+      const se=Object.entries(s.trust||{});
+      if(se.length){
+        html+=`<div class="opt-trust">`;
+        for(const [c,v]of se){
+          const bc=v>0?"#2E7D32":"#C62828";html+=`<span class="trust-badge" style="background:${v>0?"#E8F5E9":"#FFEBEE"};color:${bc}">${c} ${v>0?"+":""}${v}</span>`;
+        }
+        html+=`</div>`;
+      }
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  }
+  document.getElementById("dp-body").innerHTML=html;
+}
+
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),1800);
+}
+
+function exportSVG(){
+  const svg=document.getElementById("mm");
+  const blob=new Blob([svg.outerHTML],{type:"image/svg+xml"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="테이아_마인드맵.svg";
+  a.click();
+  showToast("SVG 파일이 다운로드됩니다");
+}
+
+window.matchMedia("(prefers-color-scheme:dark)").addEventListener("change",render);
+expanded["C1"]=true;expanded["C2"]=true;expanded["C3"]=true;
+render();
+</script>
+</body>
+</html>
